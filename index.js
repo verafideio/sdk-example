@@ -8,10 +8,17 @@ class App {
 
         /* Run examples. */
         (async () => {
+            // Login to Verafide
             await this.login();
+
+            // List credentials owned 
             await this.credentials();
+
+            // Present an owned credential
             await this.presentation();
-            await this.schemas();
+
+            // Make a credential request
+            await this.createVcRequest();
 
             process.exit(1);
         })();
@@ -22,30 +29,50 @@ class App {
      */
     async login () {
         // Do our login.
-        const login = await this.client.login(
-            'username',
-            'password',
-        );
-        console.log('login: ', login);
+        try {
+            const login = await this.client.login(
+                'username',
+                'password',
+            );
+            console.log('login: ', login);
+        } catch (e) {
+            console.error('Failed to login')
+        }
+        
     }
 
     /**
      * Fetches our credentials, and verifies the first one.
      */
     async credentials () {
-        // Fetch our credentials.
-        this.mycredentials = await this.client.ownedVCs();
-        console.log('credentials: ', this.mycredentials);
-    
-        // Verify our first credential.
-        const verify = await this.client.verify(this.mycredentials[0].vc);
-        console.log('verify: ', verify);
+        try {
+            // Fetch our credentials.
+            this.mycredentials = await this.client.ownedVCs();
+            console.log('credentials: ', this.mycredentials);
+
+            if (this.mycredentials.length > 0) {
+                // Verify our first credential.
+                const verify = await this.client.verify(this.mycredentials[0].vc);
+                console.log('verify: ', verify);
+            } else {
+                console.log('no credentials found');
+            }
+        } catch (e) {
+            console.error('Failed to login')
+        }
     }
 
     /**
      * Creates a new presentation, signs it and updates it. All while checking the current state throughout.
      */
     async presentation () {
+        
+        // Check for credentials
+        if(this.mycredentials.length == 0) {
+            console.log('no credentials found');
+            return;
+        }
+
         // Create a new presentation.
         const presentation = await this.client.newPresentation(this.mycredentials[0].type);
         console.log('presentation: ', presentation);
@@ -79,7 +106,7 @@ class App {
     /**
      * Requests schemas and public DIDs, then creates a VC request using the information we requested.
      */
-    async schemas () {
+    async createVcRequest () {
         // Fetch public schemas.
         this.publicschemas = await this.client.allCredentialSchemes();
         console.log('schemas: ', this.publicschemas);
@@ -106,7 +133,7 @@ class App {
         // Do the schema request.
         const vcRequest = await this.client.saveRequestToSign(
             vcData,
-            schema.type,
+            schema.typeDefinition,
             issuerDidInfo.walletid,
             "request",
             schema.id,

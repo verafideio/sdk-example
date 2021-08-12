@@ -30,7 +30,7 @@ This App class consists of the following 4 methods;
  - `login`
  - `credentials`
  - `presentation`
- - `schemas`
+ - `createVcRequest`
 
 These categorise the SDK methods as those found in each method are usually used together. Some SDK methods return data, that we then stored on the App class, so we can use it in other methods.
 
@@ -48,6 +48,6 @@ The credentials method demonstrates how you can fetch your Verifiable Credential
 
 The presentation method runs through our presentation flow. It shows how we can create a new presentation, giving us a secret token, and how we can check for when we should sign the presentation by polling. It also shows how to sign our VC, and update our presentation with that signed VC.
 
-### `schemas`
+### `createVcRequest`
 
 The schemas method details how schemas and DIDs can be requested and used. It fetches the required data for a VC request and makes a request for a new VC.
